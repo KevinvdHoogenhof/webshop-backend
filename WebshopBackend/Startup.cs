@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using WebshopBackend.Data;
 
 namespace WebshopBackend
 {
@@ -26,6 +28,24 @@ namespace WebshopBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<IWebshopContext, WebshopContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("APIDB")));
+
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    policy => {
+                        policy.WithOrigins("http://localhost:3000")
+                                .AllowAnyHeader()
+                                .AllowCredentials()
+                                .AllowAnyMethod()
+                            .WithOrigins("http://localhost:3001")
+                                .AllowAnyHeader()
+                                .AllowCredentials()
+                                .AllowAnyMethod()
+                                ;
+                    });
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -47,6 +67,8 @@ namespace WebshopBackend
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 

@@ -18,37 +18,37 @@ namespace WebshopBackend.Services
             _encrypt = new EncryptionService();
         }
 
-        bool IAccountService.RegisterAccount(string name, string email, string password)
+        public bool RegisterAccount(string name, string email, string password)
         {
             throw new NotImplementedException();
         }
 
-        bool IAccountService.LoginAccount(string email, string password)
+        public bool LoginAccount(string email, string password)
         {
             throw new NotImplementedException();
         }
 
-        IEnumerable<Account> IAccountService.GetAccounts()
+        public IEnumerable<Account> GetAccounts()
         {
             throw new NotImplementedException();
         }
 
-        Account IAccountService.GetAccount(int id)
+        public Account GetAccount(int id)
         {
             throw new NotImplementedException();
         }
 
-        Account IAccountService.GetAccount(string email)
+        public Account GetAccount(string email)
         {
             throw new NotImplementedException();
         }
 
-        IEnumerable<Role> IAccountService.GetRoles()
+        public IEnumerable<Role> GetRoles()
         {
             throw new NotImplementedException();
         }
 
-        bool IAccountService.SetRole(int userid, int roleid)
+        public bool SetRole(int userid, int roleid)
         {
             throw new NotImplementedException();
         }

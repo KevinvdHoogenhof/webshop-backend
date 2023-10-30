@@ -9,14 +9,33 @@ namespace WebshopBackend.Services
 {
     public class EncryptionService : IEncryptionService
     {
-        HashSalt IEncryptionService.EncryptPassword(string password)
+        public HashSalt EncryptPassword(string password)
         {
-            throw new NotImplementedException();
+            byte[] salt = new byte[128 / 8]; //Generate a 128 bit salt 
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+            string encryptedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: password,
+                salt: salt,
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 10000,
+                numBytesRequested: 256/8
+            ));
+            return new HashSalt { Hash = encryptedPassword, Salt = salt };
         }
 
-        bool IEncryptionService.VerifyPassword(string enteredpassword, byte[] salt, string storedpassword)
+        public bool VerifyPassword(string enteredpassword, byte[] salt, string storedpassword)
         {
-            throw new NotImplementedException();
+            string encryptedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: enteredpassword,
+                salt: salt,
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 10000,
+                numBytesRequested: 256/8
+            ));
+            return encryptedPassword == storedpassword;
         }
     }
 }
