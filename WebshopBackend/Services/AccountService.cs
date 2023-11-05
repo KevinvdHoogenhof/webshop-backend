@@ -18,39 +18,112 @@ namespace WebshopBackend.Services
             _encrypt = new EncryptionService();
         }
 
-        bool IAccountService.RegisterAccount(string name, string email, string password)
+        private bool InsertAccount(Account account)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.Accounts.Add(account);
+                _context.SaveChanges();
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
         }
 
-        bool IAccountService.LoginAccount(string email, string password)
+        private bool DoesEmailExist(string email)
         {
-            throw new NotImplementedException();
+            return _context.Accounts.Any(a => a.Email == email);
         }
 
-        IEnumerable<Account> IAccountService.GetAccounts()
+        public bool RegisterAccount(string name, string email, string password)
         {
-            throw new NotImplementedException();
+            if(!DoesEmailExist(email)){
+                Account a = new()
+                {
+                    Name = name,
+                    Email = email
+                };
+                var hashsalt = _encrypt.EncryptPassword(password);
+                a.Password = hashsalt.Hash;
+                a.StoredSalt = hashsalt.Salt;
+
+                a.Role = _context.Roles.Find(1);
+                return InsertAccount(a);
+            }
+            else{
+                return false;
+            }
         }
 
-        Account IAccountService.GetAccount(int id)
+        public bool LoginAccount(string email, string password)
         {
-            throw new NotImplementedException();
+            var account = _context.Accounts.FirstOrDefault(a => a.Email == email);
+            return _encrypt.VerifyPassword(password, account.StoredSalt, account.Password);
         }
 
-        Account IAccountService.GetAccount(string email)
+        public IEnumerable<Account> GetAccounts()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return _context.Accounts.Include(a => a.Role).ToArray();
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException("Could not get accounts");
+            }
         }
 
-        IEnumerable<Role> IAccountService.GetRoles()
+        public Account GetAccount(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return _context.Accounts.Where(a => a.Id == id).Include(a => a.Role).Single();
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException("Could not find account");
+            }
         }
 
-        bool IAccountService.SetRole(int userid, int roleid)
+        public Account GetAccount(string email)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return _context.Accounts.Where(a => a.Email == email).Include(a => a.Role).Single();
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException("Could not find account");
+            }
+        }
+
+        public IEnumerable<Role> GetRoles()
+        {
+            try
+            {
+                return _context.Roles.ToArray();
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException("Could not get roles");
+            }
+        }
+
+        public bool SetRole(int userid, int roleid)
+        {
+            try
+            {
+                Account acc = _context.Accounts.Where(a => a.Id == userid).Include(a => a.Role).Single();
+                acc.Role = _context.Roles.Find(roleid);
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

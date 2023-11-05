@@ -22,17 +22,17 @@ namespace WebshopBackend.Services
             _config = config;
         }
 
-        string IJWTService.GenerateToken(Account account)
+        public string GenerateToken(Account account)
         {
             throw new NotImplementedException();
         }
 
-        bool IJWTService.ValidateToken(string token)
+        public bool ValidateToken(string token)
         {
             throw new NotImplementedException();
         }
 
-        string IJWTService.GetClaim(string token, string claimType)
+        public string GetClaim(string token, string claimType)
         {
             throw new NotImplementedException();
         }
