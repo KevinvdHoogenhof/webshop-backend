@@ -13,6 +13,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using WebshopBackend.Data;
+using WebshopBackend.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 
 namespace WebshopBackend
 {
@@ -21,6 +26,7 @@ namespace WebshopBackend
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            var _jwt = new JWTService(configuration);
         }
 
         public IConfiguration Configuration { get; }
@@ -29,11 +35,17 @@ namespace WebshopBackend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<IWebshopContext, WebshopContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("APIDB")));
+                options.UseSqlServer(Configuration.GetConnectionString("DB")));
+
+            services.AddControllers();
 
             services.AddCors(options =>
             {
-                options.AddDefaultPolicy(
+                options.AddPolicy("cors",
+                    builder => builder.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:8080", "https://localhost:3000", "https://localhost:3001", "https://localhost:8080")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod());
+                /*options.AddDefaultPolicy(
                     policy => {
                         policy.WithOrigins("http://localhost:3000")
                                 .AllowAnyHeader()
@@ -44,10 +56,23 @@ namespace WebshopBackend
                                 .AllowCredentials()
                                 .AllowAnyMethod()
                                 ;
-                    });
+                    });*/
             });
 
-            services.AddControllers();
+             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options => {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = Configuration["Jwt:Issuer"],
+                        ValidAudience = Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                    };
+                });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebshopBackend", Version = "v1" });
@@ -67,6 +92,8 @@ namespace WebshopBackend
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseCors();
 

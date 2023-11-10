@@ -30,19 +30,48 @@ namespace WebshopBackend.Services
                 throw new InvalidOperationException($"Could not find product with id {id}");
             }
         }
-        public int InsertProduct(Product product)
+        public Product InsertProduct(Product product)
         {
+            try
+            {
             _context.Products.Add(product);
             _context.SaveChanges();
-            return product.Id;
+            return product;
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Error posting product");
+            }
+        }
+        public Product UpdateProduct(Product product)
+        {
+            try
+            {
+                Product p = _context.Products.Find(product.Id);
+                p.Name = product.Name;
+                p.Description = product.Description;
+                p.Image = product.Image;
+                _context.SaveChanges();
+                return p;
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Error updating product with id {product.Id}");
+            }
         }
         public bool DeleteProduct(int id)
         {
-            throw new NotImplementedException();
-        }
-        public bool UpdateProduct(Product product)
-        {
-            throw new NotImplementedException();
+            try
+            {
+                Product product = _context.Products.Find(id);
+                _context.Products.Remove(product);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException($"Error deleting product with id {id}");
+            }
         }
     }
 }

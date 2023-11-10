@@ -11,8 +11,8 @@ namespace WebshopBackend.Services
     {
         public IEnumerable<Product> GetProducts();
         public Product GetProduct(int id);
-        public int InsertProduct(Product product);
+        public Product InsertProduct(Product product);
+        public Product UpdateProduct(Product product);
         public bool DeleteProduct(int id);
-        public bool UpdateProduct(Product product);
     }
 }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebshopBackend.ViewModels
 {
-    public class LoginAccount
+    public class LoginAccountViewModel
     {
         public string Email { get; set; }
         public string Password { get; set; }

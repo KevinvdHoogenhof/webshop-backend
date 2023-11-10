@@ -24,17 +24,61 @@ namespace WebshopBackend.Services
 
         public string GenerateToken(Account account)
         {
-            throw new NotImplementedException();
+            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, account.Name),
+                new Claim(ClaimTypes.Email, account.Email),
+                new Claim(ClaimTypes.Role, account.Role.Name)
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(7),
+                Issuer = _config["Jwt:Issuer"],
+                Audience = _config["Jwt:Audience"],
+                SigningCredentials = credentials
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
         }
 
         public bool ValidateToken(string token)
         {
-            throw new NotImplementedException();
+            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["Jwt:Key"]));
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidIssuer = _config["Jwt:Issuer"],
+                    ValidAudience = _config["Jwt:Audience"],
+                    IssuerSigningKey = securityKey
+                }, out SecurityToken validatedToken); ;
+            }
+            catch
+            {
+
+                return false;
+            }
+            return true;
         }
 
         public string GetClaim(string token, string claimType)
         {
-            throw new NotImplementedException();
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var securityToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
+            var stringClaimValue = securityToken.Claims.First(claim => claim.Type == claimType).Value;
+            return stringClaimValue;
         }
     }
 }

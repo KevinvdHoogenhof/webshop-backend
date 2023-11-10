@@ -39,12 +39,11 @@ namespace WebshopBackend.Services
 
         public bool RegisterAccount(string name, string email, string password)
         {
-            if(!DoesEmailExist(email)){
-                Account a = new()
-                {
-                    Name = name,
-                    Email = email
-                };
+            if(!DoesEmailExist(email))
+            {
+                Account a = new();
+                a.Name = name;
+                a.Email = email;
                 var hashsalt = _encrypt.EncryptPassword(password);
                 a.Password = hashsalt.Hash;
                 a.StoredSalt = hashsalt.Salt;
