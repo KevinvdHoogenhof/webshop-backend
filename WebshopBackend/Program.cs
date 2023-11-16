@@ -34,6 +34,16 @@ namespace WebshopBackend
                     logger.LogError(ex, "An error occurred while migrating the database.");
                     throw;
                 }
+
+                try{
+                   SeedData.SeedData.Initialize(services); 
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred seeding the DB.");
+                    throw;
+                }
             }
             
             host.Run();
