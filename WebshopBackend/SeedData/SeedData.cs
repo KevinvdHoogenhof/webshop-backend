@@ -31,17 +31,17 @@ namespace WebshopBackend.SeedData
                 {
                     ////
                     var hashsalt = _encrypt.EncryptPassword("pw1");
-                    context.Accounts.Add(new Account() { Name = "name1", Email = "email1", Password = hashsalt.Hash, StoredSalt = hashsalt.Salt, Role = context.Roles.Find(1) });
+                    context.Accounts.Add(new Account() { Name = "name1", Email = "email1@gmail.com", Password = hashsalt.Hash, StoredSalt = hashsalt.Salt, Role = context.Roles.Find(1) });
                     context.SaveChanges();
 
                     ////
                     var hashsalt2 = _encrypt.EncryptPassword("securepassword");
-                    context.Accounts.Add(new Account() { Name = "admin", Email = "admin", Password = hashsalt2.Hash, StoredSalt = hashsalt2.Salt, Role = context.Roles.Find(2) });
+                    context.Accounts.Add(new Account() { Name = "admin", Email = "admin@gmail.com", Password = hashsalt2.Hash, StoredSalt = hashsalt2.Salt, Role = context.Roles.Find(2) });
                     context.SaveChanges();
 
                     ////
                     var hashsalt3 = _encrypt.EncryptPassword("pw3");
-                    context.Accounts.Add(new Account() { Name = "name3", Email = "email3", Password = hashsalt3.Hash, StoredSalt = hashsalt3.Salt, Role = context.Roles.Find(1) });
+                    context.Accounts.Add(new Account() { Name = "name3", Email = "email3@gmail.com", Password = hashsalt3.Hash, StoredSalt = hashsalt3.Salt, Role = context.Roles.Find(1) });
                     context.SaveChanges();
                 }
                 if(!context.Products.Any())
