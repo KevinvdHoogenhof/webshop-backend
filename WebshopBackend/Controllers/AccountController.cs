@@ -28,10 +28,11 @@ namespace WebshopBackend.Controllers
             _service = new AccountService(context);
             _jwt = new JWTService(config);
         }
-        
         [HttpPost("Register")]
         public TokenViewModel Register(RegisterAccountViewModel account)
         {
+            if(!ModelState.IsValid)
+                throw new Exception("Invalid modelstate");
             bool registered = _service.RegisterAccount(account.Name, account.Email, account.Password);
             if (registered)
             {
@@ -47,6 +48,8 @@ namespace WebshopBackend.Controllers
         [HttpPost("Login")]
         public TokenViewModel Login(LoginAccountViewModel account)
         {
+            if(!ModelState.IsValid)
+                throw new Exception("Invalid modelstate");
             if (!_service.LoginAccount(account.Email, account.Password))
             {
                 throw new InvalidOperationException("Invalid info");
