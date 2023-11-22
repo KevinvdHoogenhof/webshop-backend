@@ -43,24 +43,32 @@ namespace WebshopBackend.Controllers
         [AllowAnonymous]
         public ProductViewModel Get(int id)
         {
+            if(id < 0)
+                throw new Exception("Invalid parameter");
             Product p = _service.GetProduct(id);
             return new(p);
         }
         [HttpPost]
-        public ProductViewModel Post( string name, string description, string image)
+        public ProductViewModel Post(ProductPostViewModel product)
         {
-            Product p = new(){Name = name, Description = description, Image = image};
+            if(!ModelState.IsValid)
+                throw new Exception("Invalid modelstate");
+            Product p = new(){Name = product.Name, Description = product.Description, Image = product.Image};
             return new(_service.InsertProduct(p));
         }
         [HttpPut("{id}")]
-        public ProductViewModel Put(int id, string name, string description, string image)
+        public ProductViewModel Put(ProductUpdateViewModel product)
         {
-            Product p = new(){Id = id, Name = name, Description = description, Image = image};
+            if(!ModelState.IsValid)
+                throw new Exception("Invalid modelstate");
+            Product p = new(){Id = product.Id, Name = product.Name, Description = product.Description, Image = product.Image};
             return new(_service.UpdateProduct(p));
         }
         [HttpDelete("{id}")]
         public bool Delete(int id)
         {
+            if(id < 0)
+                throw new Exception("Invalid parameter");
             return _service.DeleteProduct(id);
         }
 
