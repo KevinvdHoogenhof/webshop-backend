@@ -77,7 +77,7 @@ namespace WebshopBackend.Controllers
             {
                 if (email[i].Equals("@"))
                 {
-                    for (int z = i+1; z < email.Length; z++)
+                    for (int z = i+2; z < email.Length; z++)
                     {
                         if (email[z].Equals(".") && email.Length > z)
                         {
