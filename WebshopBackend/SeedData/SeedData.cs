@@ -15,7 +15,7 @@ namespace WebshopBackend.SeedData
     public static class SeedData
     {
         //Remove later
-        private static IEncryptionService _encrypt = new EncryptionService();
+        private static IHashService _hash = new HashService();
         public static void Initialize(IServiceProvider serviceProvider)
         {
             using (var context = new WebshopContext(serviceProvider.GetRequiredService<DbContextOptions<WebshopContext>>()))
@@ -30,17 +30,17 @@ namespace WebshopBackend.SeedData
                 if (!context.Accounts.Any())
                 {
                     ////
-                    var hashsalt = _encrypt.EncryptPassword("pw1");
+                    var hashsalt = _hash.HashPassword("pw1");
                     context.Accounts.Add(new Account() { Name = "name1", Email = "email1@gmail.com", Password = hashsalt.Hash, StoredSalt = hashsalt.Salt, Role = context.Roles.Find(1) });
                     context.SaveChanges();
 
                     ////
-                    var hashsalt2 = _encrypt.EncryptPassword("securepassword");
+                    var hashsalt2 = _hash.HashPassword("securepassword");
                     context.Accounts.Add(new Account() { Name = "admin", Email = "admin@gmail.com", Password = hashsalt2.Hash, StoredSalt = hashsalt2.Salt, Role = context.Roles.Find(2) });
                     context.SaveChanges();
 
                     ////
-                    var hashsalt3 = _encrypt.EncryptPassword("pw3");
+                    var hashsalt3 = _hash.HashPassword("pw3");
                     context.Accounts.Add(new Account() { Name = "name3", Email = "email3@gmail.com", Password = hashsalt3.Hash, StoredSalt = hashsalt3.Salt, Role = context.Roles.Find(1) });
                     context.SaveChanges();
                 }

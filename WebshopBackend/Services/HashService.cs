@@ -7,35 +7,35 @@ using System.Threading.Tasks;
 
 namespace WebshopBackend.Services
 {
-    public class EncryptionService : IEncryptionService
+    public class HashService : IHashService
     {
-        public HashSalt EncryptPassword(string password)
+        public HashSalt HashPassword(string password)
         {
             byte[] salt = new byte[128 / 8]; //Generate a 128 bit salt 
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(salt);
             }
-            string encryptedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            string PasswordHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: password,
                 salt: salt,
                 prf: KeyDerivationPrf.HMACSHA512,
                 iterationCount: 100000,
                 numBytesRequested: 256/8
             ));
-            return new HashSalt { Hash = encryptedPassword, Salt = salt };
+            return new HashSalt { Hash = PasswordHash, Salt = salt };
         }
 
         public bool VerifyPassword(string enteredpassword, byte[] salt, string storedpassword)
         {
-            string encryptedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            string PasswordHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: enteredpassword,
                 salt: salt,
                 prf: KeyDerivationPrf.HMACSHA512,
                 iterationCount: 100000,
                 numBytesRequested: 256/8
             ));
-            return encryptedPassword == storedpassword;
+            return PasswordHash == storedpassword;
         }
     }
 }

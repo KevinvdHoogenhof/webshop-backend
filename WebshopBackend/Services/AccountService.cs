@@ -11,11 +11,11 @@ namespace WebshopBackend.Services
     public class AccountService : IAccountService
     {
         private readonly IWebshopContext _context;
-        private readonly IEncryptionService _encrypt;
+        private readonly IHashService _hash;
         public AccountService(IWebshopContext context)
         {
             _context = context;
-            _encrypt = new EncryptionService();
+            _hash = new HashService();
         }
 
         private bool InsertAccount(Account account)
@@ -44,7 +44,7 @@ namespace WebshopBackend.Services
                 Account a = new();
                 a.Name = name;
                 a.Email = email;
-                var hashsalt = _encrypt.EncryptPassword(password);
+                var hashsalt = _hash.HashPassword(password);
                 a.Password = hashsalt.Hash;
                 a.StoredSalt = hashsalt.Salt;
 
@@ -59,7 +59,7 @@ namespace WebshopBackend.Services
         public bool LoginAccount(string email, string password)
         {
             var account = _context.Accounts.FirstOrDefault(a => a.Email == email);
-            return _encrypt.VerifyPassword(password, account.StoredSalt, account.Password);
+            return _hash.VerifyPassword(password, account.StoredSalt, account.Password);
         }
 
         public IEnumerable<Account> GetAccounts()

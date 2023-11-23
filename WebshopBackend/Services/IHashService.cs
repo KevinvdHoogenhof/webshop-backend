@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace WebshopBackend.Services
 {
-    public interface IEncryptionService
+    public interface IHashService
     {
-        public HashSalt EncryptPassword(string password);
+        public HashSalt HashPassword(string password);
         public bool VerifyPassword(string enteredpassword, byte[] salt, string storedpassword);
     }
 }
