@@ -17,7 +17,7 @@ namespace WebshopBackend.Models
         [MaxLength(100)]
         public string Email { get; set; }
         public string Password { get; set; }
-        public byte[] StoredSalt { get; set; }
+        public string StoredSalt { get; set; } //SeedData / accountservice
         public Role Role { get; set; }
     }
 }

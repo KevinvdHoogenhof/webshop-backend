@@ -23,14 +23,14 @@ namespace WebshopBackend.Services
                 iterationCount: 100000,
                 numBytesRequested: 256/8
             ));
-            return new HashSalt { Hash = PasswordHash, Salt = salt };
+            return new HashSalt { Hash = PasswordHash, Salt = Convert.ToBase64String(salt) };
         }
 
-        public bool VerifyPassword(string enteredpassword, byte[] salt, string storedpassword)
+        public bool VerifyPassword(string enteredpassword, string salt, string storedpassword)
         {
             string PasswordHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: enteredpassword,
-                salt: salt,
+                salt: Convert.FromBase64String(salt),
                 prf: KeyDerivationPrf.HMACSHA512,
                 iterationCount: 100000,
                 numBytesRequested: 256/8

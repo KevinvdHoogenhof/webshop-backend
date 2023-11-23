@@ -8,6 +8,6 @@ namespace WebshopBackend.Services
     public class HashSalt
     {
         public string Hash { get; set; }
-        public byte[] Salt { get; set; }
+        public string Salt { get; set; }
     }
 }

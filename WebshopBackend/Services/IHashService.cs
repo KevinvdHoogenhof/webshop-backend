@@ -8,6 +8,6 @@ namespace WebshopBackend.Services
     public interface IHashService
     {
         public HashSalt HashPassword(string password);
-        public bool VerifyPassword(string enteredpassword, byte[] salt, string storedpassword);
+        public bool VerifyPassword(string enteredpassword, string salt, string storedpassword);
     }
 }
