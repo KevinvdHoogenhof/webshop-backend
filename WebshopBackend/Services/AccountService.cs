@@ -12,10 +12,12 @@ namespace WebshopBackend.Services
     {
         private readonly IWebshopContext _context;
         private readonly IHashService _hash;
+        //private readonly IEncryptionService _encrypt;
         public AccountService(IWebshopContext context)
         {
             _context = context;
             _hash = new HashService();
+            //_encrypt = new EncryptionService(Convert.FromBase64String("PqpY2n5zViisrdaEF7cH2a5g1mKTJvzwx5xCDqN6E6s="));
         }
 
         private bool InsertAccount(Account account)

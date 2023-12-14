@@ -28,6 +28,25 @@ namespace WebshopBackend.Controllers
             _service = new AccountService(context);
             _jwt = new JWTService(config);
         }
+        //
+        //Testing only
+        //
+        /*
+        [HttpGet]
+        public IEnumerable<AccountViewModel> Get()
+        {
+            List<Account> accounts = _service.GetAccounts().ToList();
+            List<AccountViewModel> avms = new();
+            for (int i = 0; i < accounts.Count(); i++)
+            {
+                avms.Add(new(accounts[i]));
+            }
+            return avms.ToArray();
+        }
+        */
+        //
+        //
+        //
         [HttpPost("Register")]
         public TokenViewModel Register(RegisterAccountViewModel account)
         {
@@ -35,7 +54,7 @@ namespace WebshopBackend.Controllers
                 throw new Exception("Invalid modelstate");
             if(!IsEmailValid(account.Email))
                 throw new Exception("Invalid email");
-            if(!IsPasswordValid(account.Email))
+            if(!IsPasswordValid(account.Password))
                 throw new Exception("Invalid password");
 
             bool registered = _service.RegisterAccount(account.Name, account.Email, account.Password);
@@ -75,11 +94,11 @@ namespace WebshopBackend.Controllers
         {
             for (int i = 0; i < email.Length; i++)
             {
-                if (email[i].Equals("@"))
+                if (email[i] == '@')
                 {
                     for (int z = i+2; z < email.Length; z++)
                     {
-                        if (email[z].Equals(".") && email.Length > z)
+                        if (email[z] == '.' && email.Length > z)
                         {
                             return true;
                         }
