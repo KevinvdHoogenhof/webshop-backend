@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -23,11 +26,33 @@ namespace WebshopBackend.Controllers
     {
         private readonly IAccountService _service;
         private readonly IJWTService _jwt;
-        public AccountController(IWebshopContext context, IConfiguration config)
+        private readonly ILogger _logger;
+        public AccountController(IWebshopContext context, IConfiguration config, ILogger<AccountController> logger)
         {
             _service = new AccountService(context);
             _jwt = new JWTService(config);
+            _logger = logger;
         }
+        //
+        //Testing only
+        //
+        ///*
+        [HttpGet]
+        public IEnumerable<AccountViewModel> Get()
+        {
+            _logger.LogInformation($"Endpoint called, additional information: {GetRequestDetails()}");
+            List<Account> accounts = _service.GetAccounts().ToList();
+            List<AccountViewModel> avms = new();
+            for (int i = 0; i < accounts.Count(); i++)
+            {
+                avms.Add(new(accounts[i]));
+            }
+            return avms.ToArray();
+        }
+        //*/
+        //
+        //
+        //
         [HttpPost("Register")]
         public TokenViewModel Register(RegisterAccountViewModel account)
         {
@@ -35,7 +60,7 @@ namespace WebshopBackend.Controllers
                 throw new Exception("Invalid modelstate");
             if(!IsEmailValid(account.Email))
                 throw new Exception("Invalid email");
-            if(!IsPasswordValid(account.Email))
+            if(!IsPasswordValid(account.Password))
                 throw new Exception("Invalid password");
 
             bool registered = _service.RegisterAccount(account.Name, account.Email, account.Password);
@@ -53,6 +78,7 @@ namespace WebshopBackend.Controllers
         [HttpPost("Login")]
         public TokenViewModel Login(LoginAccountViewModel account)
         {
+            _logger.LogInformation($"Endpoint called, additional information: {GetRequestDetails()}");
             if(!ModelState.IsValid)
                 throw new Exception("Invalid modelstate");
             if (!_service.LoginAccount(account.Email, account.Password))
@@ -75,11 +101,11 @@ namespace WebshopBackend.Controllers
         {
             for (int i = 0; i < email.Length; i++)
             {
-                if (email[i].Equals("@"))
+                if (email[i] == '@')
                 {
-                    for (int z = i+1; z < email.Length; z++)
+                    for (int z = i+2; z < email.Length; z++)
                     {
-                        if (email[z].Equals(".") && email.Length > z)
+                        if (email[z] == '.' && email.Length > z)
                         {
                             return true;
                         }
@@ -135,6 +161,16 @@ namespace WebshopBackend.Controllers
                 return true;
             }            
             return false;
+        }
+        private string GetRequestDetails()
+        {
+            StringBuilder details = new StringBuilder();
+
+            // Request path and query
+            details.AppendLine($"Path: {HttpContext.Request.Path}");
+            details.AppendLine($"Query: {HttpContext.Request.QueryString}");
+
+            return details.ToString();
         }
     }
 }

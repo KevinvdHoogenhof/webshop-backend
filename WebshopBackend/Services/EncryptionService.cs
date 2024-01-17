@@ -1,41 +1,90 @@
-﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
+using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
+﻿using System.Security.Cryptography;
+using Aes = System.Security.Cryptography.Aes;
+using System.IO;
 
 namespace WebshopBackend.Services
 {
     public class EncryptionService : IEncryptionService
     {
-        public HashSalt EncryptPassword(string password)
+        private readonly byte[] _key;
+        public EncryptionService(byte[] key)
         {
-            byte[] salt = new byte[128 / 8]; //Generate a 128 bit salt 
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(salt);
-            }
-            string encryptedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: password,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA512,
-                iterationCount: 100000,
-                numBytesRequested: 256/8
-            ));
-            return new HashSalt { Hash = encryptedPassword, Salt = salt };
+            _key = key;
         }
 
-        public bool VerifyPassword(string enteredpassword, byte[] salt, string storedpassword)
+        public string Encrypt(string plaintext)
         {
-            string encryptedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: enteredpassword,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA512,
-                iterationCount: 100000,
-                numBytesRequested: 256/8
-            ));
-            return encryptedPassword == storedpassword;
+            //Check input
+            if(plaintext == null || plaintext.Length <= 0)
+                throw new ArgumentNullException("plaintext");
+            if(_key == null || _key.Length <=0)
+                throw new ArgumentNullException("key");
+
+            byte[] encrypted;
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = _key;
+
+                //Encryptor
+                ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+                //Streams for encryption
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using(CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                    {
+                        using(StreamWriter sw = new StreamWriter(cs))
+                        {
+                            sw.Write(plaintext);
+                        }
+                        encrypted = ms.ToArray();
+                    }
+                }
+                AesCipher aesCipher = new(Convert.ToBase64String(aes.IV), Convert.ToBase64String(encrypted));
+                return aesCipher.ToString();
+                //return Convert.ToBase64String(aes.IV) + "$" + Convert.ToBase64String(encrypted);
+            }
+        }
+        public string Decrypt(string IVciphertext)
+        {
+            AesCipher aesCipher = new(IVciphertext);
+            //Check input
+            if(aesCipher.Ciphertext == null || aesCipher.Ciphertext.Length <= 0)
+                throw new ArgumentNullException("ciphertext");
+            if(_key == null || _key.Length <=0)
+                throw new ArgumentNullException("key");
+            if(aesCipher.IV == null || aesCipher.IV.Length <=0)
+                throw new ArgumentNullException("iv");
+
+            string plaintext;
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = _key;
+                aes.IV = Convert.FromBase64String(aesCipher.IV);
+
+                //Decryptor
+                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+                //Streams for decryption
+                using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(aesCipher.Ciphertext)))
+                {
+                    using(CryptoStream cs = new CryptoStream(ms, decryptor,CryptoStreamMode.Read))
+                    {
+                        using(StreamReader sr = new StreamReader(cs))
+                        {
+                            plaintext = sr.ReadToEnd();
+                        }
+                    }
+                }
+            }
+            return plaintext;
         }
     }
 }
