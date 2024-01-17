@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -22,10 +23,12 @@ namespace WebshopBackend.Controllers
     {
         private readonly IProductService _service;
         private readonly IJWTService _jwt;
-        public ProductController(IWebshopContext context, IConfiguration config)
+        private readonly ILogger _logger;
+        public ProductController(IWebshopContext context, IConfiguration config, ILogger<ProductController> logger)
         {
             _service = new ProductService(context);
             _jwt = new JWTService(config);
+            _logger = logger;
         }
         [HttpGet]
         [AllowAnonymous]
@@ -43,6 +46,7 @@ namespace WebshopBackend.Controllers
         [AllowAnonymous]
         public ProductViewModel Get(int id)
         {
+            _logger.LogInformation($"Endpoint called, additional information: {GetRequestDetails()}");
             if(id < 0)
                 throw new Exception("Invalid parameter");
             Product p = _service.GetProduct(id);
@@ -71,6 +75,15 @@ namespace WebshopBackend.Controllers
                 throw new Exception("Invalid parameter");
             return _service.DeleteProduct(id);
         }
+        private string GetRequestDetails()
+        {
+            StringBuilder details = new StringBuilder();
 
+            // Request path and query
+            details.AppendLine($"Path: {HttpContext.Request.Path}");
+            details.AppendLine($"Query: {HttpContext.Request.QueryString}");
+
+            return details.ToString();
+        }
     }
 }
